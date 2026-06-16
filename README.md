@@ -62,6 +62,7 @@ Tested across CUDA 12.0, 12.6, and 13.2 and drivers 595.71.05, 535.309.01, and 5
 | RTX 3070 | 8.6 | Ampere | 32 | reproduced |
 | A40 | 8.6 | Ampere | 32 | reproduced |
 | RTX 4090 | 8.9 | Ada | 32 | reproduced |
+| RTX 4050 (Laptop) | 8.9 | Ada | 32 | reproduced |
 | H100 | 9.0 | Hopper | 32 | reproduced |
 | H200 | 9.0 | Hopper | 32 | uniform promotion in SASS, runtime pending |
 
