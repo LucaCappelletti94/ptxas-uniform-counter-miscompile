@@ -64,7 +64,7 @@ Tested across CUDA 12.0, 12.6, and 13.2 and drivers 595.71.05, 535.309.01, and 5
 | RTX 4090 | 8.9 | Ada | 32 | reproduced |
 | RTX 4050 (Laptop) | 8.9 | Ada | 32 | reproduced |
 | H100 | 9.0 | Hopper | 32 | reproduced |
-| H200 | 9.0 | Hopper | 32 | uniform promotion in SASS, runtime pending |
+| H200 | 9.0 | Hopper | 32 | reproduced |
 
 The static `SEL R*, R*, UR*` signal is also present for sm_120 (Blackwell), untested at runtime. Run `bash run_matrix.sh` on any GPU to add a row.
 
