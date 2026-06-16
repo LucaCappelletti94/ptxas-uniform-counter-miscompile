@@ -51,7 +51,20 @@ The defect is in `ptxas`, not the front end or the kernel:
 
 ## Coverage
 
-Reproduced on two RTX 4090 hosts (sm_89): driver 595.71.05 with CUDA 13.2, and driver 535.309.01 with CUDA 12.0. The uniform-counter `SEL R*, R*, UR*` also appears in the cubin for sm_80, sm_86, sm_90, sm_100, and sm_120, so this is not limited to Ada. Run `bash run_matrix.sh` to confirm on a given GPU.
+Tested across CUDA 12.0, 12.6, and 13.2 and drivers 595.71.05, 535.309.01, and 580.126.20. The boundary is Ampere: ptxas promotes the counter to the uniform datapath at sm_80 and later, but not at Volta (sm_70) or Turing (sm_75), and only the promoted parts miscompile.
+
+| GPU | CC | Arch | Result |
+|---|---|---|---|
+| Tesla V100 | 7.0 | Volta | not reproduced |
+| RTX 2080 Ti | 7.5 | Turing | not reproduced |
+| Quadro RTX 8000 | 7.5 | Turing | not reproduced |
+| A100 | 8.0 | Ampere | uniform promotion in SASS, runtime pending |
+| A40 | 8.6 | Ampere | reproduced |
+| RTX 4090 | 8.9 | Ada | reproduced |
+| H100 | 9.0 | Hopper | reproduced |
+| H200 | 9.0 | Hopper | uniform promotion in SASS, runtime pending |
+
+The static `SEL R*, R*, UR*` signal is also present for sm_120 (Blackwell), untested at runtime. Run `bash run_matrix.sh` on any GPU to add a row.
 
 ## Files
 
