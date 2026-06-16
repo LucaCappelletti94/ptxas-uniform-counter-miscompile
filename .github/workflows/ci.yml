@@ -28,7 +28,7 @@ jobs:
           method: network
           # Toolkit only. The full cuda-X-Y meta pulls the NVIDIA driver, whose
           # dkms build fails on the runner, and CI never runs on a GPU anyway.
-          sub-packages: '["nvcc", "cudart-dev", "cuobjdump"]'
+          sub-packages: '["nvcc", "cudart-dev", "cuobjdump", "nvdisasm"]'
 
       - name: Versions
         run: |
