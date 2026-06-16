@@ -19,7 +19,7 @@ jobs:
         cuda: ["12.6.3", "13.2.0"]   # add new releases to keep tracking
     name: cuda ${{ matrix.cuda }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install CUDA ${{ matrix.cuda }}
         uses: Jimver/cuda-toolkit@v0.2.35
