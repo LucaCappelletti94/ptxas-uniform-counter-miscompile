@@ -51,18 +51,18 @@ The defect is in `ptxas`, not the front end or the kernel:
 
 ## Coverage
 
-Tested across CUDA 12.0, 12.6, and 13.2 and drivers 595.71.05, 535.309.01, and 580.126.20. The boundary is Ampere: ptxas promotes the counter to the uniform datapath at sm_80 and later, but not at Volta (sm_70) or Turing (sm_75), and only the promoted parts miscompile.
+Tested across CUDA 12.0, 12.6, and 13.2 and drivers 595.71.05, 535.309.01, and 580.126.20. The boundary is Ampere: ptxas promotes the counter to the uniform datapath at sm_80 and later, but not at Volta (sm_70) or Turing (sm_75), and only the promoted parts miscompile. Warp size is 32 on every part below, so the bug is not tied to an unusual warp width.
 
-| GPU | CC | Arch | Result |
-|---|---|---|---|
-| Tesla V100 | 7.0 | Volta | not reproduced |
-| RTX 2080 Ti | 7.5 | Turing | not reproduced |
-| Quadro RTX 8000 | 7.5 | Turing | not reproduced |
-| A100 | 8.0 | Ampere | uniform promotion in SASS, runtime pending |
-| A40 | 8.6 | Ampere | reproduced |
-| RTX 4090 | 8.9 | Ada | reproduced |
-| H100 | 9.0 | Hopper | reproduced |
-| H200 | 9.0 | Hopper | uniform promotion in SASS, runtime pending |
+| GPU | CC | Arch | Warp | Result |
+|---|---|---|---|---|
+| Tesla V100 | 7.0 | Volta | 32 | not reproduced |
+| RTX 2080 Ti | 7.5 | Turing | 32 | not reproduced |
+| Quadro RTX 8000 | 7.5 | Turing | 32 | not reproduced |
+| A100 | 8.0 | Ampere | 32 | uniform promotion in SASS, runtime pending |
+| A40 | 8.6 | Ampere | 32 | reproduced |
+| RTX 4090 | 8.9 | Ada | 32 | reproduced |
+| H100 | 9.0 | Hopper | 32 | reproduced |
+| H200 | 9.0 | Hopper | 32 | uniform promotion in SASS, runtime pending |
 
 The static `SEL R*, R*, UR*` signal is also present for sm_120 (Blackwell), untested at runtime. Run `bash run_matrix.sh` on any GPU to add a row.
 
