@@ -51,7 +51,7 @@ The defect is in `ptxas`, not the front end or the kernel:
 
 ## Coverage
 
-Tested across CUDA 12.0, 12.6, and 13.2 and drivers 595.71.05, 535.309.01, and 580.126.20. The boundary is Ampere: ptxas promotes the counter to the uniform datapath at sm_80 and later, but not at Volta (sm_70) or Turing (sm_75), and only the promoted parts miscompile. Warp size is 32 on every part below, so the bug is not tied to an unusual warp width.
+Tested across CUDA 12.0, 12.6, and 13.2 and drivers 595.71.05, 535.309.01, and 580.126.20. The boundary tracks the uniform datapath. Volta (sm_70) does not use it at all (zero uniform-register operands in this kernel), Turing (sm_75) uses it sparingly (about 23 operands) but never promotes the loop counter, and from Ampere (sm_80) onward ptxas leans on it heavily (140 to 260 operands) and promotes the per-thread counter into it, which is exactly where the miscompile appears. Only the promoted parts are affected. Warp size is 32 on every part below, so the bug is not tied to an unusual warp width.
 
 | GPU | CC | Arch | Warp | Result |
 |---|---|---|---|---|
