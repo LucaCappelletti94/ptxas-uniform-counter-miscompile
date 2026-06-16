@@ -1,0 +1,60 @@
+# GPU-free CI. GitHub runners have no NVIDIA GPU, so this cannot run the
+# kernel; it builds it and asserts the ptxas codegen signal in the SASS:
+# at -O3 the candidate_position counter is promoted to a uniform register
+# (the bug), at -O0 it is not. This tracks the codegen across CUDA versions.
+# It does not prove runtime (in)correctness; that needs a GPU (make test).
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  sass-signal:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cuda: ["12.6.3", "13.2.0"]   # add new releases to keep tracking
+    name: cuda ${{ matrix.cuda }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install CUDA ${{ matrix.cuda }}
+        uses: Jimver/cuda-toolkit@v0.2.35
+        with:
+          cuda: ${{ matrix.cuda }}
+          method: network
+
+      - name: Versions
+        run: |
+          nvcc --version | tail -2
+          ptxas --version | tail -2
+
+      - name: Build (host harness compiles end to end)
+        run: |
+          nvcc -arch=sm_89 -std=c++17 -o repro_O3 repro.cu
+          nvcc -arch=sm_89 -std=c++17 -Xptxas -O0 -o repro_O0 repro.cu
+
+      - name: Assert SASS signal (sm_89)
+        run: |
+          nvcc -arch=sm_89 -std=c++17 -cubin -o k_O3.cubin repro.cu
+          nvcc -arch=sm_89 -std=c++17 -Xptxas -O0 -cubin -o k_O0.cubin repro.cu
+          o3=$(cuobjdump -sass k_O3.cubin | grep -cE "SEL R[0-9]+, R[0-9]+, UR" || true)
+          o0=$(cuobjdump -sass k_O0.cubin | grep -cE "UIADD3 UR|USEL|UISETP" || true)
+          echo "O3 SEL-from-uniform-counter: $o3 (expect >= 1)"
+          echo "O0 uniform-datapath instrs: $o0 (expect 0)"
+          test "$o3" -ge 1
+          test "$o0" -eq 0
+
+      - name: Per-arch signal (informational)
+        run: |
+          for a in sm_80 sm_86 sm_89 sm_90 sm_100 sm_120; do
+            if nvcc -arch=$a -std=c++17 -cubin -o /tmp/k.cubin repro.cu 2>/dev/null; then
+              n=$(cuobjdump -sass /tmp/k.cubin | grep -cE "SEL R[0-9]+, R[0-9]+, UR" || true)
+              echo "$a: SEL-from-uniform-counter = $n"
+            else
+              echo "$a: not supported by this toolkit"
+            fi
+          done
