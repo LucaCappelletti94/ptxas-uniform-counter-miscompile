@@ -59,6 +59,7 @@ Tested across CUDA 12.0, 12.6, and 13.2 and drivers 595.71.05, 535.309.01, and 5
 | RTX 2080 Ti | 7.5 | Turing | 32 | not reproduced |
 | Quadro RTX 8000 | 7.5 | Turing | 32 | not reproduced |
 | A100 | 8.0 | Ampere | 32 | uniform promotion in SASS, runtime pending |
+| RTX 3070 | 8.6 | Ampere | 32 | reproduced |
 | A40 | 8.6 | Ampere | 32 | reproduced |
 | RTX 4090 | 8.9 | Ada | 32 | reproduced |
 | H100 | 9.0 | Hopper | 32 | reproduced |
