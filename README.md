@@ -51,22 +51,28 @@ The defect is in `ptxas`, not the front end or the kernel:
 
 ## Coverage
 
-Tested across CUDA 12.0, 12.6, and 13.2 and drivers 595.71.05, 535.309.01, and 580.126.20. The boundary tracks the uniform datapath. Volta (sm_70) does not use it at all (zero uniform-register operands in this kernel), Turing (sm_75) uses it sparingly (about 23 operands) but never promotes the loop counter, and from Ampere (sm_80) onward ptxas leans on it heavily (140 to 260 operands) and promotes the per-thread counter into it, which is exactly where the miscompile appears. Only the promoted parts are affected. Warp size is 32 on every part below, so the bug is not tied to an unusual warp width.
+Tested across CUDA 12.0, 12.4, 12.6, 13.0, and 13.2 and drivers 535.309.01, 550.54.14, 580.119.02, 580.126.20, 580.142, and 595.71.05.
+
+The boundary tracks the uniform datapath. Volta (`sm_70`) remains a negative control: V100 has been reported correct both in the original matrix and on a CUDA 12.4 / driver 550.54.14 cluster run. Turing (`sm_75`) also remains negative: the RTX 2070 SUPER / CUDA 13.0 / driver 580.119.02 capture is correct at both `-O3` and `-O0`, matching earlier RTX 2080 Ti and Quadro RTX 8000 results.
+
+From Ampere (`sm_80`) onward, the miscompile is confirmed at runtime. The failure is also reproduced on `sm_86` Ampere, `sm_89` Ada, and `sm_90` Hopper. The RTX 4070 SUPER capture is especially useful because it uses the same CUDA 13.0 `ptxas` release as the negative RTX 2070 SUPER capture, but native `sm_89` runtime execution fails exactly as expected: `-O3` records `best_position = 4` for anchor 13673, while `-O0` records the correct value `2`.
+
+Only the promoted parts are affected. Warp size is 32 on every part below, so the bug is not tied to an unusual warp width.
 
 | GPU | CC | Arch | Warp | Result |
-|---|---|---|---|---|
+|---|---:|---|---:|---|
 | Tesla V100 | 7.0 | Volta | 32 | not reproduced |
+| GeForce RTX 2070 SUPER | 7.5 | Turing | 32 | not reproduced |
 | RTX 2080 Ti | 7.5 | Turing | 32 | not reproduced |
 | Quadro RTX 8000 | 7.5 | Turing | 32 | not reproduced |
-| A100 | 8.0 | Ampere | 32 | uniform promotion in SASS, runtime pending |
+| A100 | 8.0 | Ampere | 32 | reproduced |
 | RTX 3070 | 8.6 | Ampere | 32 | reproduced |
 | A40 | 8.6 | Ampere | 32 | reproduced |
+| RTX 4050 Laptop | 8.9 | Ada | 32 | reproduced |
+| RTX 4070 SUPER | 8.9 | Ada | 32 | reproduced |
 | RTX 4090 | 8.9 | Ada | 32 | reproduced |
-| RTX 4050 (Laptop) | 8.9 | Ada | 32 | reproduced |
 | H100 | 9.0 | Hopper | 32 | reproduced |
 | H200 | 9.0 | Hopper | 32 | reproduced |
-
-The static `SEL R*, R*, UR*` signal is also present for sm_120 (Blackwell), untested at runtime. Run `bash run_matrix.sh` on any GPU to add a row.
 
 ## Files
 
