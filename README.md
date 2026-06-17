@@ -51,13 +51,18 @@ The defect is in `ptxas`, not the front end or the kernel:
 
 ## Coverage
 
-Tested across CUDA 12.0, 12.4, 12.6, 13.0, and 13.2 and drivers 535.309.01, 550.54.14, 580.119.02, 580.126.20, 580.142, and 595.71.05.
+Tested across CUDA Toolkit 12.0, 12.4, 12.6, 12.9, 13.0, and 13.2, and drivers 535.309.01, 550.54.14, 580.119.02, 580.126.20, 580.142, 595.71.05, and 595.80.
 
-The boundary tracks the uniform datapath. Volta (`sm_70`) remains a negative control: V100 has been reported correct both in the original matrix and on a CUDA 12.4 / driver 550.54.14 cluster run. Turing (`sm_75`) also remains negative: the RTX 2070 SUPER / CUDA 13.0 / driver 580.119.02 capture is correct at both `-O3` and `-O0`, matching earlier RTX 2080 Ti and Quadro RTX 8000 results.
+The bug is confirmed at runtime on Ampere, Ada, and Hopper: `-O3` records the impossible post-loop value `best_position = 4` for anchor 13673, while `-O0` records the correct value `2`. Volta and Turing remain negative controls, and an RTX 5080 / Blackwell run is also negative with CUDA Toolkit 12.9.
 
-From Ampere (`sm_80`) onward, the miscompile is confirmed at runtime. The failure is also reproduced on `sm_86` Ampere, `sm_89` Ada, and `sm_90` Hopper. The RTX 4070 SUPER capture is especially useful because it uses the same CUDA 13.0 `ptxas` release as the negative RTX 2070 SUPER capture, but native `sm_89` runtime execution fails exactly as expected: `-O3` records `best_position = 4` for anchor 13673, while `-O0` records the correct value `2`.
+The strongest architecture split so far is:
 
-Only the promoted parts are affected. Warp size is 32 on every part below, so the bug is not tied to an unusual warp width.
+- Volta (`sm_70`): not reproduced.
+- Turing (`sm_75`): not reproduced.
+- Ampere (`sm_80`, `sm_86`): reproduced.
+- Ada (`sm_89`): reproduced.
+- Hopper (`sm_90`): reproduced.
+- Blackwell (`sm_120`): not reproduced.
 
 | GPU | CC | Arch | Warp | Result |
 |---|---:|---|---:|---|
@@ -73,6 +78,7 @@ Only the promoted parts are affected. Warp size is 32 on every part below, so th
 | RTX 4090 | 8.9 | Ada | 32 | reproduced |
 | H100 | 9.0 | Hopper | 32 | reproduced |
 | H200 | 9.0 | Hopper | 32 | reproduced |
+| GeForce RTX 5080 | 12.0 | Blackwell | 32 | not reproduced on CUDA Toolkit 12.9 / driver 595.80 |
 
 ## Files
 
