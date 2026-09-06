@@ -10,6 +10,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   sass-signal:
     runs-on: ubuntu-latest
@@ -19,10 +22,10 @@ jobs:
         cuda: ["12.6.3", "13.2.0"]   # add new releases to keep tracking
     name: cuda ${{ matrix.cuda }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Install CUDA ${{ matrix.cuda }}
-        uses: Jimver/cuda-toolkit@v0.2.35
+        uses: Jimver/cuda-toolkit@3d45d157f327c09c04b50ee6ccdea2d9d017ec76 # v0.2.35
         with:
           cuda: ${{ matrix.cuda }}
           method: network
