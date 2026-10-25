@@ -13,9 +13,14 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   sass-signal:
     runs-on: ubuntu-26.04
+    container: nvidia/cuda:${{ matrix.cuda }}-devel-ubuntu24.04
     strategy:
       fail-fast: false
       matrix:
@@ -23,15 +28,6 @@ jobs:
     name: cuda ${{ matrix.cuda }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Install CUDA ${{ matrix.cuda }}
-        uses: Jimver/cuda-toolkit@b8bf9c6c28f8a92fbb04dcfcaee872e60c57462d # v0.2.36
-        with:
-          cuda: ${{ matrix.cuda }}
-          method: network
-          # Toolkit only. The full cuda-X-Y meta pulls the NVIDIA driver, whose
-          # dkms build fails on the runner, and CI never runs on a GPU anyway.
-          sub-packages: '["nvcc", "cudart-dev", "cuobjdump", "nvdisasm"]'
 
       - name: Versions
         run: |
